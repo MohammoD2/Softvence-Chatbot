@@ -48,8 +48,8 @@
 
 - Input: a user chat message (string) via the Streamlit UI.
 - Output: a short, professional assistant reply (string) that references product knowledge when relevant.
-- Failure modes: missing API key, missing FAISS index for a product, network failures to OpenRouter.
-
+Failure modes: missing API key, missing FAISS index for a product, network failures to OpenRouter.
+- The chatbot now considers previous messages in the chat, allowing for more context-aware and coherent responses.
 
 ## 🛠️ Prerequisites
 

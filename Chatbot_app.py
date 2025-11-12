@@ -44,7 +44,7 @@ st.title("Welcome TO Softvence's Chatbot")
 # --- Sidebar Settings ---
 with st.sidebar:
     # --- Logo Section ---
-    logo_url = "images/Logo.jpg"  # 🔸 Replace with your actual logo URL or local path
+    logo_url = "images\Logo.jpg"  # 🔸 Replace with your actual logo URL or local path
 
     st.markdown(
         f"""
