@@ -94,56 +94,72 @@ class SimpleChatManager:
             logger.error(f"Error searching chunks for product {product}: {str(e)}")
             return []
 
-    def generate_response(self, query: str, context: list, product: str) -> str:
-        if not context:
-            return "Welcome to Softvence! We're a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. How can we help you achieve your goals?"
+        def generate_response(self, history: list, context: list, product: str) -> str:
+            """
+            Generate a response using the full chat history and product context.
+            history: list of dicts with 'role' and 'content'.
+            context: list of relevant product chunks.
+            """
+            if not context:
+                return "Welcome to Softvence! We're a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. How can we help you achieve your goals?"
 
-        prompt = f"""Context:\n{chr(10).join(context)}\n\nInstructions:\n
-        You are the voice of Softvence, a cutting-edge technology agency dedicated to delivering innovative solutions in AI/ML, blockchain, web development, mobile apps, UX/UI design, and graphics & branding. Your responses should reflect our commitment to empowering businesses with tailored, scalable, and secure digital ecosystems.
-
-        **Core Behavior:**
-        - Use a professional, approachable, and customer-focused tone.
-        - Be clear, concise, and eager to assist with actionable insights.
-        - Highlight Softvence's expertise in technology and design when relevant.
-        - If asked about the agency, say: "Softvence is a technology agency specializing in AI/ML, blockchain, web and mobile development, UX/UI design, and branding. We're here to transform your ideas into impactful digital solutions."
-        - Avoid overly technical jargon unless the query demands it, ensuring responses are accessible to all clients.
-        - If relevant, encourage users to connect via our contact channels for project discussions.
-
-        Respond to: "{query}"
-        """
-
-        try:
-            response = requests.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                data=json.dumps({
-                    "model": OPENROUTER_MODEL,
-                    "messages": [
-                        {"role": "user", "content": prompt}
-                    ],
-                })
+            # System prompt for LLM behavior
+            system_prompt = (
+                "You are the voice of Softvence, a cutting-edge technology agency dedicated to delivering innovative solutions in AI/ML, blockchain, web development, mobile apps, UX/UI design, and graphics & branding. "
+                "Your responses should reflect our commitment to empowering businesses with tailored, scalable, and secure digital ecosystems.\n\n"
+                "**Core Behavior:**\n"
+                "- Use a professional, approachable, and customer-focused tone.\n"
+                "- Be clear, concise, and eager to assist with actionable insights.\n"
+                "- Highlight Softvence's expertise in technology and design when relevant.\n"
+                "- If asked about the agency, say: 'Softvence is a technology agency specializing in AI/ML, blockchain, web and mobile development, UX/UI design, and branding. We're here to transform your ideas into impactful digital solutions.'\n"
+                "- Avoid overly technical jargon unless the query demands it, ensuring responses are accessible to all clients.\n"
+                "- If relevant, encourage users to connect via our contact channels for project discussions.\n"
+                "Always use the following context for your answers (if relevant):\n"
+                + chr(10).join(context)
             )
 
-            if response.status_code == 200:
-                result = response.json()
-                return result["choices"][0]["message"]["content"]
-            else:
-                logger.error(f"OpenRouter API error: {response.text}")
-                return "Sorry, I faced an issue while generating the response."
-        except Exception as e:
-            logger.error(f"Error generating response: {str(e)}")
-            return "System interruption detected. Please try again shortly."
+            # Build LLM message history: prepend system prompt, then all previous messages
+            messages = [{"role": "system", "content": system_prompt}]
+            for msg in history:
+                # Only allow 'user' and 'assistant' roles
+                if msg["role"] in ("user", "assistant"):
+                    messages.append({"role": msg["role"], "content": msg["content"]})
+
+            try:
+                response = requests.post(
+                    url="https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    data=json.dumps({
+                        "model": OPENROUTER_MODEL,
+                        "messages": messages,
+                    })
+                )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    return result["choices"][0]["message"]["content"]
+                else:
+                    logger.error(f"OpenRouter API error: {response.text}")
+                    return "Sorry, I faced an issue while generating the response."
+            except Exception as e:
+                logger.error(f"Error generating response: {str(e)}")
+                return "System interruption detected. Please try again shortly."
 
 # Initialize the simple chat manager
 simple_chat_manager = SimpleChatManager()
 
-def chatbot(message: str, product: str = "Softvence") -> str:
+def chatbot(history: list, product: str = "Softvence") -> str:
     """
-    Chatbot function that takes a message and product name, and returns the chatbot's response.
+    Chatbot function that takes the full chat history and product name, and returns the chatbot's response.
+    history: list of dicts with 'role' and 'content'.
     """
-    relevant_chunks = simple_chat_manager.search_similar_chunks(message, product)
-    response = simple_chat_manager.generate_response(message, relevant_chunks, product)
+    # Use the latest user message for chunk search
+    user_message = next((msg["content"] for msg in reversed(history) if msg["role"] == "user"), None)
+    if not user_message:
+        return "Please enter a message."
+    relevant_chunks = simple_chat_manager.search_similar_chunks(user_message, product)
+    response = simple_chat_manager.generate_response(history, relevant_chunks, product)
     return response

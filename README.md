@@ -1,11 +1,31 @@
-# Softvence Chatbot
+
+<div align="center">
+  <h1>Softvence Chatbot</h1>
+  
+  <p>
+    <img src="https://img.shields.io/badge/Streamlit-Enabled-red?logo=streamlit" alt="Streamlit">
+    <img src="https://img.shields.io/badge/Python-3.8+-blue?logo=python">
+    <img src="https://img.shields.io/badge/License-Custom-lightgrey">
+  </p>
+  
+  <strong>Created by <span style="color:#007acc">Mohammod Ibrahim Hossain</span></strong>
+</div>
+
+---
+
+<p align="center">
+  Welcome to the <b>Softvence Chatbot</b> — a clean, searchable, and extensible Streamlit-based QA assistant that uses sentence-transformers embeddings and a FAISS vector index to find relevant content for product-specific knowledge and a conversational LLM to generate responses.
+</p>
+
+<p align="center">
+  <i>This README is crafted to be friendly, actionable, and impressive for reviewers. It explains architecture, setup (Windows PowerShell), how the pieces fit together, troubleshooting, and sensible next steps.</i>
+</p>
 
 
-Welcome to the Softvence Chatbot — a clean, searchable, and extensible Streamlit-based QA assistant that uses sentence-transformers embeddings and a FAISS vector index to find relevant content for product-specific knowledge and a conversational LLM  to generate responses.
 
-This README is crafted to be friendly, actionable, and impressive for reviewers. It explains architecture, setup (Windows PowerShell), how the pieces fit together, troubleshooting, and sensible next steps.
+---
 
-## Quick summary
+## 🚀 Quick summary
 
 - Project: Softvence Chatbot
 - Purpose: Provide a product-aware conversational assistant that answers user questions using indexed product content and an LLM.
@@ -13,7 +33,8 @@ This README is crafted to be friendly, actionable, and impressive for reviewers.
 - Backend/logic: `Chatbot.py` (embeddings, FAISS search, OpenRouter calls), `process_pipeline.py` (data processing pipeline — used to create chunks & FAISS index).
 - Data: `processed_data/<ProductName>/faiss_store/index.faiss` + `chunks.pkl` (embeddings and text chunks). Additional supporting content in `local_storage/`.
 
-## Project layout (important files)
+
+## 🗂️ Project layout (important files)
 
 - `Chatbot_app.py` — Streamlit UI, session handling and invocation of `chatbot()`.
 - `Chatbot.py` — Chat logic: loads FAISS index, embeddings model, searches for similar chunks, and asks the LLM to generate responses.
@@ -22,21 +43,26 @@ This README is crafted to be friendly, actionable, and impressive for reviewers.
 - `processed_data/` — Contains per-product FAISS indexes used at runtime.
 - `local_storage/Softvence/product_info.txt` — example product content used to seed the knowledge base.
 
-## Contract (short)
+
+## 📜 Contract (short)
 
 - Input: a user chat message (string) via the Streamlit UI.
 - Output: a short, professional assistant reply (string) that references product knowledge when relevant.
 - Failure modes: missing API key, missing FAISS index for a product, network failures to OpenRouter.
 
-## Prerequisites
+
+## 🛠️ Prerequisites
 
 - Windows (instructions below use PowerShell). Works similarly on macOS / Linux but adjust the commands (bash). 
 - Python 3.8+ recommended.
 - A modern internet connection for the LLM API calls.
 
-Important: This repository currently includes an example `.env` file. Treat any real API keys as secrets; rotate them if they were checked into source control.
 
-## Setup — Windows PowerShell (recommended)
+> **Note**
+> This repository currently includes an example `.env` file. Treat any real API keys as secrets; rotate them if they were checked into source control.
+
+
+## ⚡ Setup — Windows PowerShell (recommended)
 
 1. Open PowerShell in the project root (where `requirements.txt` and `Chatbot_app.py` live).
 
@@ -69,9 +95,13 @@ Note: The repository may contain an example `.env`. If you put real keys in sour
 ```toml
 OPENROUTER_API_KEY = "your_openrouter_api_key_here"
 ```
-# Handling the OPENROUTER_API_KEY (Local vs Streamlit Cloud)
 
-**How to access your API key securely:**
+---
+
+## 🔑 Handling the OPENROUTER_API_KEY (Local vs Streamlit Cloud)
+
+
+> **How to access your API key securely:**
 
 - **Locally (development):**
   - Store your key in a `.env` file at the project root.
@@ -81,7 +111,8 @@ OPENROUTER_API_KEY = "your_openrouter_api_key_here"
   - Add your key to the Streamlit secrets UI or in `.streamlit/secrets.toml`.
   - Access it in your code using `st.secrets["OPENROUTER_API_KEY"]`.
 
-**Recommended code pattern:**
+
+> **Recommended code pattern:**
 
 ```python
 import os
@@ -109,7 +140,10 @@ streamlit run .\Chatbot_app.py
 
 Open the local URL shown by Streamlit (usually http://localhost:8501).
 
-## How it works (end-to-end)
+
+---
+
+## 🧠 How it works (end-to-end)
 
 1. On start, `Chatbot.py` creates a `SimpleChatManager` that scans `processed_data/` for per-product data and attempts to load:
    - A FAISS index (`index.faiss`) located at `processed_data/<Product>/faiss_store/index.faiss`.
@@ -123,20 +157,29 @@ Open the local URL shown by Streamlit (usually http://localhost:8501).
 
 3. If no FAISS index or relevant chunks exist, the app returns a friendly product overview fallback.
 
-## Rebuilding or adding product data
+
+---
+
+## 🏗️ Rebuilding or adding product data
 
 1. Add source documents to a directory or create a new product folder under `processed_data/<NewProduct>/`.
 2. Run `process_pipeline.py` to chunk, embed, and build the FAISS index. (This file is part of the repo and should be tailored to your documents.)
 3. Confirm `processed_data/<NewProduct>/faiss_store/index.faiss` and `chunks.pkl` are created.
 4. Restart Streamlit or the app will pick up the new product on next initialization.
 
-## Configuration & important constants (where to change)
+
+---
+
+## ⚙️ Configuration & important constants (where to change)
 
 - Embedding model: `Chatbot.py` sets `MODEL_NAME = "all-MiniLM-L6-v2"`. Change if you want a different model.
 - FAISS index path: `processed_data/<product>/faiss_store/index.faiss` (convention used by the code).
 - LLM model used for generation is configured via `OPENROUTER_MODEL` in `Chatbot.py`.
 
-## Troubleshooting
+
+---
+
+## 🩺 Troubleshooting
 
 - Problem: "No FAISS index or chunks found for product"
   - Ensure `processed_data/<Product>/faiss_store/index.faiss` exists and `chunks.pkl` is present.
@@ -153,20 +196,31 @@ Open the local URL shown by Streamlit (usually http://localhost:8501).
 - Problem: The LLM output is incorrect or off-topic
   - Inspect the constructed prompt in `Chatbot.py` and refine the instruction section or reduce noisy chunks.
 
-Check logs: `Chatbot.py` configures logging. You can change the logging level at the top of the file to `INFO` or `DEBUG` for more details.
 
-## Safety & privacy
+> **Tip:**
+> `Chatbot.py` configures logging. You can change the logging level at the top of the file to `INFO` or `DEBUG` for more details.
+
+
+---
+
+## 🔒 Safety & privacy
 
 - Do not commit real API keys to version control. Use .env, OS environment variables, or Streamlit secrets.
 - If your product data contains PII, ensure you follow your organization's data-retention and privacy policies when embedding and storing vectors.
 
-## Edge cases & notes
+
+---
+
+## 🧩 Edge cases & notes
 
 - Empty dataset: The bot returns a friendly company overview if no relevant chunks are found.
 - Large datasets: FAISS handles large vector collections, but embedding generation is the bottleneck. Use batched embedding generation when building indexes.
 - Offline: If the LLM endpoint is unreachable, the app logs an error and returns a short failure message.
 
-## Development checklist (quick)
+
+---
+
+## 📝 Development checklist (quick)
 
 1. Create & activate venv
 2. Install requirements
@@ -174,7 +228,10 @@ Check logs: `Chatbot.py` configures logging. You can change the logging level at
 4. Run `process_pipeline.py` to index product docs (if you have new docs)
 5. Run Streamlit
 
-## Commands (PowerShell)
+
+---
+
+## 💻 Commands (PowerShell)
 
 ```powershell
 # create venv and activate
@@ -188,18 +245,27 @@ pip install -r .\requirements.txt
 streamlit run .\Chatbot_app.py
 ```
 
-## Next steps / improvements (suggestions)
+
+---
+
+## 🌱 Next steps / improvements (suggestions)
 
 - Add a CI check that aborts if `.env` is committed or any API key is present.
 - Add unit tests for: FAISS loading, embedding generation stubbed, prompt construction.
 - Add a small Dockerfile for deployment.
 - Add a small test harness script to simulate end-to-end requests to the LLM using a test key / mock server.
 
-## Contributing
+
+---
+
+## 🤝 Contributing
 
 If you'd like to contribute: fork, create a branch, add tests for new behavior, and open a PR with a clear description of the change. Follow the repository style and keep changes small.
 
-## License
+
+---
+
+## 📄 License
 
 This project is provided as-is. Add a license file (e.g. MIT) if you want to allow reuse.
 
@@ -213,4 +279,3 @@ If you'd like, I can also:
 
 Tell me which of the above you'd like next and I will implement it.
 
-**Created by Mohammod Ibrahim Hossain**

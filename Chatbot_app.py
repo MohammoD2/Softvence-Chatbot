@@ -9,11 +9,11 @@ from Chatbot import chatbot   # assuming you saved your code in chatbot.py
 load_dotenv()
 
 # --- Logo Path ---
-logo_path = "https://www.alloftech.site/images/Logo.jpg"  # ✅ Use your uploaded logo
+logo_path = "images/Logo.jpg"  # ✅ Use your uploaded logo
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="AllOfTech's Chatbot",
+    page_title="Softvence's Chatbot",
     page_icon=logo_path,   # ✅ Custom tab icon
     layout="centered"
 )
@@ -39,19 +39,19 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # --- Title ---
-st.title("Welcome TO AllOfTech's Chatbot")
+st.title("Welcome TO Softvence's Chatbot")
 
 # --- Sidebar Settings ---
 with st.sidebar:
     # --- Logo Section ---
-    logo_url = "https://www.alloftech.site/images/Logo.jpg"  # 🔸 Replace with your actual logo URL or local path
+    logo_url = "images/Logo.jpg"  # 🔸 Replace with your actual logo URL or local path
 
     st.markdown(
         f"""
         <div style="text-align: center; margin-bottom: 20px;">
             <img src="{logo_url}" 
                  style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc;">
-            <h2 style="margin-top: 10px; font-size: 20px;">AllOfTech</h2>
+            <h2 style="margin-top: 10px; font-size: 20px;">Softvence</h2>
         </div>
         """,
         unsafe_allow_html=True
@@ -63,7 +63,7 @@ with st.sidebar:
     def clear_chat_history():
         st.session_state.messages = [{
             "role": "assistant",
-            "content": "Assalamu alaikum! 🌟 Welcome to AllOfTech’s chatbot! I’m here to answer your questions about our innovative solutions in AI/ML, blockchain, web and mobile app development, UX/UI design, and branding. How can we help bring your ideas to life?"
+            "content": "Assalamu alaikum! 🌟 Welcome to Softvence’s chatbot! I’m here to answer your questions about our innovative solutions in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. How can we help bring your ideas to life?"
         }]
     st.button("Clear Chat History", on_click=clear_chat_history)
 
@@ -72,7 +72,7 @@ with st.sidebar:
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant",
-        "content": "Assalamu alaikum! 🌟 Welcome to AllOfTech’s chatbot! I’m here to answer your questions about our innovative solutions in AI/ML, blockchain, web and mobile app development, UX/UI design, and branding. How can we help bring your ideas to life?"
+        "content": "Assalamu alaikum! 🌟 Welcome to Softvence’s chatbot! I’m here to answer your questions about our innovative solutions in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. How can we help bring your ideas to life?"
     }]
 
 # --- Display Chat Messages ---
@@ -90,7 +90,8 @@ if prompt := st.chat_input("Type your message..."):
     # Generate and display bot response
     with st.chat_message("assistant"):
         with st.spinner("Generating response..."):
-            response = chatbot(prompt, product="AllOfTech")
+            # Pass the full chat history for memory
+            response = chatbot(st.session_state.messages, product="Softvence")
             st.markdown(response)
 
     # Append assistant response
