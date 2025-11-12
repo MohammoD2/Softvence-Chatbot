@@ -1,5 +1,6 @@
 # Softvence Chatbot
 
+
 Welcome to the Softvence Chatbot — a clean, searchable, and extensible Streamlit-based QA assistant that uses sentence-transformers embeddings and a FAISS vector index to find relevant content for product-specific knowledge and a conversational LLM  to generate responses.
 
 This README is crafted to be friendly, actionable, and impressive for reviewers. It explains architecture, setup (Windows PowerShell), how the pieces fit together, troubleshooting, and sensible next steps.
@@ -211,3 +212,5 @@ If you'd like, I can also:
 - Add a tiny test that imports `Chatbot.py` and does a dry-run of `SimpleChatManager` (mocking network calls).
 
 Tell me which of the above you'd like next and I will implement it.
+
+**Created by Mohammod Ibrahim Hossain**
