@@ -9,7 +9,7 @@ from Chatbot import chatbot   # assuming you saved your code in chatbot.py
 load_dotenv()
 
 # --- Logo Path ---
-logo_path = "images/Logo.jpg"  # ✅ Use your uploaded logo
+logo_path = "https://softvence.agency/wp-content/uploads/2025/09/IMG_3770.jpg"  # ✅ Use your uploaded logo
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -44,7 +44,7 @@ st.title("Welcome TO Softvence's Chatbot")
 # --- Sidebar Settings ---
 with st.sidebar:
     # --- Logo Section ---
-    logo_url = "images\Logo.jpg"  # 🔸 Replace with your actual logo URL or local path
+    logo_url = "https://softvence.agency/wp-content/uploads/2025/09/IMG_3770.jpg"  # 🔸 Replace with your actual logo URL or local path
 
     st.markdown(
         f"""
