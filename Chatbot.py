@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 PROCESSED_DATA_DIR = "processed_data"
 MODEL_NAME = "all-MiniLM-L6-v2"
 OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
-OPENROUTER_MODEL = "arliai/qwq-32b-arliai-rpr-v1:free"
+OPENROUTER_MODEL = "deepseek/deepseek-r1-0528-qwen3-8b:free"
 
 # Initialize embeddings model
 embeddings_model = SentenceTransformer(MODEL_NAME)
@@ -94,36 +94,23 @@ class SimpleChatManager:
             logger.error(f"Error searching chunks for product {product}: {str(e)}")
             return []
 
-    def generate_response(self, history: list, context: list, product: str) -> str:
-        """
-        Generate a response using the full chat history and product context.
-        history: list of dicts with 'role' and 'content'.
-        context: list of relevant product chunks.
-        """
+    def generate_response(self, query: str, context: list, product: str) -> str:
         if not context:
             return "Welcome to Softvence! We're a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. How can we help you achieve your goals?"
 
-        # System prompt for LLM behavior
-        system_prompt = (
-            "You are the voice of Softvence, a cutting-edge technology agency dedicated to delivering innovative solutions in AI/ML, blockchain, web development, mobile apps, UX/UI design, and graphics & branding. "
-            "Your responses should reflect our commitment to empowering businesses with tailored, scalable, and secure digital ecosystems.\n\n"
-            "**Core Behavior:**\n"
-            "- Use a professional, approachable, and customer-focused tone.\n"
-            "- Be clear, concise, and eager to assist with actionable insights.\n"
-            "- Highlight Softvence's expertise in technology and design when relevant.\n"
-            "- If asked about the agency, say: 'Softvence is a technology agency specializing in AI/ML, blockchain, web and mobile development, UX/UI design, and branding. We're here to transform your ideas into impactful digital solutions.'\n"
-            "- Avoid overly technical jargon unless the query demands it, ensuring responses are accessible to all clients.\n"
-            "- If relevant, encourage users to connect via our contact channels for project discussions.\n"
-            "Always use the following context for your answers (if relevant):\n"
-            + chr(10).join(context)
-        )
+        prompt = f"""Context:\n{chr(10).join(context)}\n\nInstructions:\n
+        You are the voice of Softvence, a cutting-edge technology agency dedicated to delivering innovative solutions in AI/ML, blockchain, web development, mobile apps, UX/UI design, and graphics & branding. Your responses should reflect our commitment to empowering businesses with tailored, scalable, and secure digital ecosystems.
 
-        # Build LLM message history: prepend system prompt, then all previous messages
-        messages = [{"role": "system", "content": system_prompt}]
-        for msg in history:
-            # Only allow 'user' and 'assistant' roles
-            if msg["role"] in ("user", "assistant"):
-                messages.append({"role": msg["role"], "content": msg["content"]})
+        **Core Behavior:**
+        - Use a professional, approachable, and customer-focused tone.
+        - Be clear, concise, and eager to assist with actionable insights.
+        - Highlight Softvence's expertise in technology and design when relevant.
+        - If asked about the agency, say: "Softvence is a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. We're here to transform your ideas into impactful digital solutions."
+        - Avoid overly technical jargon unless the query demands it, ensuring responses are accessible to all clients.
+        - If relevant, encourage users to connect via our contact channels for project discussions.
+
+        Respond to: "{query}"
+        """
 
         try:
             response = requests.post(
@@ -134,7 +121,9 @@ class SimpleChatManager:
                 },
                 data=json.dumps({
                     "model": OPENROUTER_MODEL,
-                    "messages": messages,
+                    "messages": [
+                        {"role": "user", "content": prompt}
+                    ],
                 })
             )
 
@@ -151,15 +140,10 @@ class SimpleChatManager:
 # Initialize the simple chat manager
 simple_chat_manager = SimpleChatManager()
 
-def chatbot(history: list, product: str = "Softvence") -> str:
+def chatbot(message: str, product: str = "Softvence") -> str:
     """
-    Chatbot function that takes the full chat history and product name, and returns the chatbot's response.
-    history: list of dicts with 'role' and 'content'.
+    Chatbot function that takes a message and product name, and returns the chatbot's response.
     """
-    # Use the latest user message for chunk search
-    user_message = next((msg["content"] for msg in reversed(history) if msg["role"] == "user"), None)
-    if not user_message:
-        return "Please enter a message."
-    relevant_chunks = simple_chat_manager.search_similar_chunks(user_message, product)
-    response = simple_chat_manager.generate_response(history, relevant_chunks, product)
+    relevant_chunks = simple_chat_manager.search_similar_chunks(message, product)
+    response = simple_chat_manager.generate_response(message, relevant_chunks, product)
     return response

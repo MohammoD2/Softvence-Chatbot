@@ -1,6 +1,6 @@
 [theme]
-primaryColor="#cbf29b"  # Greenish accent, like Grok/GitHub dark
-backgroundColor="#cbf29b"  # Almost black background
-secondaryBackgroundColor="#FAF9F6"  # Slightly lighter for cards/panels
+primaryColor="#FAF9F6"  # Greenish accent, like Grok/GitHub dark
+backgroundColor="#FAF9F6"  # Almost black background
+secondaryBackgroundColor="#b9ec7aff"  # Slightly lighter for cards/panels
 textColor="#151616ff"  
 font="sans serif"
