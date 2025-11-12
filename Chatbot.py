@@ -24,9 +24,11 @@ PROCESSED_DATA_DIR = "processed_data"
 MODEL_NAME = "all-MiniLM-L6-v2"
 OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
 OPENROUTER_MODEL = "meta-llama/llama-3.3-8b-instruct:free"
+MAX_HISTORY = 10  # Limit conversation memory to last 10 messages
 
 # Initialize embeddings model
 embeddings_model = SentenceTransformer(MODEL_NAME)
+
 
 class ProductData:
     def __init__(self, product_name: str):
@@ -51,9 +53,11 @@ class ProductData:
         except Exception as e:
             logger.error(f"Error loading data for {self.product_name}: {str(e)}")
 
+
 class SimpleChatManager:
     def __init__(self):
         self.product_data = {}
+        self.conversation_memory = {}  # key: user/session ID, value: list of messages
         self.initialize_products()
 
     def initialize_products(self):
@@ -96,7 +100,9 @@ class SimpleChatManager:
 
     def generate_response(self, query: str, context: list, product: str) -> str:
         if not context:
-            return "Welcome to Softvence! We're a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. How can we help you achieve your goals?"
+            return ("Welcome to Softvence! We're a technology agency specializing in "
+                    "Brand Identity Design, UX/UI Design, Web Development, Mobile App Development, "
+                    "Consultation, Accounting & Bookkeeping, Data Analytics. How can we help you achieve your goals?")
 
         prompt = f"""Context:\n{chr(10).join(context)}\n\nInstructions:\n
         You are the voice of Softvence, a cutting-edge technology agency dedicated to delivering innovative solutions in AI/ML, blockchain, web development, mobile apps, UX/UI design, and graphics & branding. Your responses should reflect our commitment to empowering businesses with tailored, scalable, and secure digital ecosystems.
@@ -105,7 +111,7 @@ class SimpleChatManager:
         - Use a professional, approachable, and customer-focused tone.
         - Be clear, concise, and eager to assist with actionable insights.
         - Highlight Softvence's expertise in technology and design when relevant.
-        - If asked about the agency, say: "Softvence is a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. We're here to transform your ideas into impactful digital solutions."
+        - If asked about the agency, say: "Softvence is a technology agency specializing in Brand Identity Design, UX/UI Design, Web Development, Mobile App Development, Consultation, Accounting & Bookkeeping, Data Analytics. We're here to transform your ideas into impactful digital solutions."
         - Avoid overly technical jargon unless the query demands it, ensuring responses are accessible to all clients.
         - If relevant, encourage users to connect via our contact channels for project discussions.
 
@@ -137,13 +143,39 @@ class SimpleChatManager:
             logger.error(f"Error generating response: {str(e)}")
             return "System interruption detected. Please try again shortly."
 
+
 # Initialize the simple chat manager
 simple_chat_manager = SimpleChatManager()
 
-def chatbot(message: str, product: str = "Softvence") -> str:
+
+def chatbot(message: str, product: str = "Softvence", user_id: str = "default_user") -> str:
     """
-    Chatbot function that takes a message and product name, and returns the chatbot's response.
+    Chatbot function that considers conversation history for context.
     """
+    # Initialize memory for the user if not exists
+    if user_id not in simple_chat_manager.conversation_memory:
+        simple_chat_manager.conversation_memory[user_id] = []
+
+    # Add user's current message to memory
+    simple_chat_manager.conversation_memory[user_id].append({"role": "user", "content": message})
+
+    # Retrieve relevant chunks based on current message
     relevant_chunks = simple_chat_manager.search_similar_chunks(message, product)
-    response = simple_chat_manager.generate_response(message, relevant_chunks, product)
+
+    # Include conversation history in prompt
+    history = simple_chat_manager.conversation_memory[user_id][-MAX_HISTORY:]
+    formatted_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in history])
+
+    # Generate response using memory + retrieved chunks
+    response = simple_chat_manager.generate_response(
+        message,
+        context=relevant_chunks + [formatted_history],
+        product=product
+    )
+
+    # Add bot response to memory
+    simple_chat_manager.conversation_memory[user_id].append({"role": "assistant", "content": response})
+
     return response
+
+
