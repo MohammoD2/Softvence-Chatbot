@@ -6,8 +6,14 @@
     <img src="https://img.shields.io/badge/Streamlit-Enabled-red?logo=streamlit" alt="Streamlit">
     <img src="https://img.shields.io/badge/Python-3.8+-blue?logo=python">
     <img src="https://img.shields.io/badge/License-Custom-lightgrey">
+    <img src="https://img.shields.io/badge/LLM-OpenRouter-FF6B35?logo=openai" alt="OpenRouter LLM">
+    <img src="https://img.shields.io/badge/LLM-Llama%203.3-10A37F?logo=llama" alt="Llama 3.3">
+    <img src="https://img.shields.io/badge/Embeddings-Sentence%20Transformers-0D7E4D?logo=huggingface" alt="Sentence Transformers">
+    <img src="https://img.shields.io/badge/Vector%20DB-FAISS-4B0082?logo=facebook" alt="FAISS">
+    <img src="https://img.shields.io/badge/Framework-LangChain-1F70C1?logo=chainlink" alt="LangChain">
+    <img src="https://img.shields.io/badge/Hub-HuggingFace-FFD700?logo=huggingface" alt="HuggingFace Hub">
   </p>
-  
+
   <strong>Created by <span style="color:#007acc">Mohammod Ibrahim Hossain</span></strong>
 </div>
 
