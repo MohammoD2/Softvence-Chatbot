@@ -94,11 +94,21 @@ class SimpleChatManager:
             logger.error(f"Error searching chunks for product {product}: {str(e)}")
             return []
 
-    def generate_response(self, query: str, context: list, product: str) -> str:
+    def generate_response(self, query: str, context: list, product: str, conversation_history: list = None) -> str:
         if not context:
             return "Welcome to Softvence! We're a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. How can we help you achieve your goals?"
 
-        prompt = f"""Context:\n{chr(10).join(context)}\n\nInstructions:\n
+        # Build conversation context from history
+        conversation_context = ""
+        if conversation_history:
+            history_messages = [msg for msg in conversation_history[:-1] if msg["role"] in ["user", "assistant"]]
+            if history_messages:
+                conversation_context = "\n\nPrevious conversation:\n"
+                for msg in history_messages[-4:]:  # Keep last 4 messages for context
+                    role_label = "User" if msg["role"] == "user" else "Assistant"
+                    conversation_context += f"{role_label}: {msg['content']}\n"
+
+        prompt = f"""Context:\n{chr(10).join(context)}{conversation_context}\n\nInstructions:\n
         You are the voice of Softvence, a cutting-edge technology agency dedicated to delivering innovative solutions in AI/ML, blockchain, web development, mobile apps, UX/UI design, and graphics & branding. Your responses should reflect our commitment to empowering businesses with tailored, scalable, and secure digital ecosystems.
 
         **Core Behavior:**
@@ -108,6 +118,7 @@ class SimpleChatManager:
         - If asked about the agency, say: "Softvence is a technology agency specializing in Brand Identity Design , UX/UI Design ,Web Development , Mobile App Development  , Consultation , Accounting & Bookkeeping , Data Analytics. We're here to transform your ideas into impactful digital solutions."
         - Avoid overly technical jargon unless the query demands it, ensuring responses are accessible to all clients.
         - If relevant, encourage users to connect via our contact channels for project discussions.
+        - Remember and reference previous parts of the conversation when relevant to maintain continuity.
 
         Respond to: "{query}"
         """
@@ -140,10 +151,19 @@ class SimpleChatManager:
 # Initialize the simple chat manager
 simple_chat_manager = SimpleChatManager()
 
-def chatbot(message: str, product: str = "Softvence") -> str:
+def chatbot(message: str, product: str = "Softvence", conversation_history: list = None) -> str:
     """
-    Chatbot function that takes a message and product name, and returns the chatbot's response.
+    Chatbot function that takes a message, product name, and conversation history, and returns the chatbot's response.
     """
-    relevant_chunks = simple_chat_manager.search_similar_chunks(message, product)
-    response = simple_chat_manager.generate_response(message, relevant_chunks, product)
+    # Extract the actual user message if a list of messages is passed
+    user_message = message
+    if isinstance(message, list) and len(message) > 0:
+        # Get the last user message from the conversation history
+        for msg in reversed(message):
+            if msg["role"] == "user":
+                user_message = msg["content"]
+                break
+    
+    relevant_chunks = simple_chat_manager.search_similar_chunks(user_message, product)
+    response = simple_chat_manager.generate_response(user_message, relevant_chunks, product, conversation_history or message)
     return response
