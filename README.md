@@ -1,36 +1,3 @@
-## Handling the OPENROUTER_API_KEY (Local vs Streamlit Cloud)
-
-**How to access your API key securely:**
-
-- **Locally (development):**
-  - Store your key in a `.env` file at the project root.
-  - Access it in your code using `os.getenv("OPENROUTER_API_KEY")` after calling `load_dotenv()`.
-
-- **On Streamlit Cloud:**
-  - Add your key to the Streamlit secrets UI or in `.streamlit/secrets.toml`.
-  - Access it in your code using `st.secrets["OPENROUTER_API_KEY"]`.
-
-**Recommended code pattern:**
-
-```python
-import os
-from dotenv import load_dotenv
-import streamlit as st
-
-load_dotenv()
-
-def get_openrouter_api_key():
-    # Prefer Streamlit secrets if available, else fallback to .env
-    if hasattr(st, "secrets") and "OPENROUTER_API_KEY" in st.secrets:
-        return st.secrets["OPENROUTER_API_KEY"]
-    return os.getenv("OPENROUTER_API_KEY")
-
-# Usage:
-OPENROUTER_API_KEY = get_openrouter_api_key()
-```
-
-This ensures your code works both locally and on Streamlit Cloud, and never hardcodes secrets.
-
 # Softvence Chatbot
 
 Welcome to the Softvence Chatbot — a clean, searchable, and extensible Streamlit-based QA assistant that uses sentence-transformers embeddings and a FAISS vector index to find relevant content for product-specific knowledge and a conversational LLM  to generate responses.
@@ -101,7 +68,38 @@ Note: The repository may contain an example `.env`. If you put real keys in sour
 ```toml
 OPENROUTER_API_KEY = "your_openrouter_api_key_here"
 ```
+# Handling the OPENROUTER_API_KEY (Local vs Streamlit Cloud)
 
+**How to access your API key securely:**
+
+- **Locally (development):**
+  - Store your key in a `.env` file at the project root.
+  - Access it in your code using `os.getenv("OPENROUTER_API_KEY")` after calling `load_dotenv()`.
+
+- **On Streamlit Cloud:**
+  - Add your key to the Streamlit secrets UI or in `.streamlit/secrets.toml`.
+  - Access it in your code using `st.secrets["OPENROUTER_API_KEY"]`.
+
+**Recommended code pattern:**
+
+```python
+import os
+from dotenv import load_dotenv
+import streamlit as st
+
+load_dotenv()
+
+def get_openrouter_api_key():
+    # Prefer Streamlit secrets if available, else fallback to .env
+    if hasattr(st, "secrets") and "OPENROUTER_API_KEY" in st.secrets:
+        return st.secrets["OPENROUTER_API_KEY"]
+    return os.getenv("OPENROUTER_API_KEY")
+
+# Usage:
+OPENROUTER_API_KEY = get_openrouter_api_key()
+```
+
+This ensures your code works both locally and on Streamlit Cloud, and never hardcodes secrets.
 6. Run the Streamlit app:
 
 ```powershell
